@@ -1,0 +1,14 @@
+<h2>Welcome, {{ user?.userId }} ({{ user?.role }})</h2>
+<button (click)="logout()">Logout</button>
+
+<div *ngIf="loading">Loading user records...</div>
+<table *ngIf="!loading">
+  <tr>
+    <th>User ID</th>
+    <th>Role</th>
+  </tr>
+  <tr *ngFor="let record of records">
+    <td>{{ record.userId }}</td>
+    <td>{{ record.role }}</td>
+  </tr>
+</table>
