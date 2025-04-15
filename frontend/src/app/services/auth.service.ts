@@ -20,22 +20,30 @@ export class AuthService {
   }
 
   // User login
-  login(data: { userId: string; password: string }): Observable<any> {
-    return this.http.post(`${this.baseUrl}/login`, data).pipe(
-      catchError(this.handleError)  // Handle any error from the HTTP request
-    );
-  }
+login(data: { userId: string; password: string }): Observable<any> {
+  return this.http.post(`${this.baseUrl}/login`, data);
+}
 
-  // Store user info
-  saveUser(user: any): void {
+saveUser(user: any): void {
+  if (user && (user.userId || user._id)) {
+    console.log('Saving user to localStorage:', user);
     localStorage.setItem('user', JSON.stringify(user));
+  } else {
+    console.error('Cannot save invalid user:', user);
+    throw new Error('Invalid user object');
   }
+}
 
-  // Retrieve user info
-  getUser(): any | null {
-    const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+// Retrieve user info
+getUser(): any | null {
+  const userStr = localStorage.getItem('user');
+  try {
+    return userStr ? JSON.parse(userStr) : null;
+  } catch (e) {
+    console.error('Error parsing user data:', e);
+    return null;
   }
+}
 
   // Logout user
   logout(): void {

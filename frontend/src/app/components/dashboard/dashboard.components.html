@@ -1,14 +1,30 @@
-<h2>Welcome, {{ user?.userId }} ({{ user?.role }})</h2>
-<button (click)="logout()">Logout</button>
+<div class="dashboard-container">
+  <header>
+    <h2>Welcome, {{ user?.userId || 'User' }}</h2>
+    <p>Role: {{ user?.role || 'Unknown' }}</p>
+    <button (click)="logout()">Logout</button>
+  </header>
 
-<div *ngIf="loading">Loading user records...</div>
-<table *ngIf="!loading">
-  <tr>
-    <th>User ID</th>
-    <th>Role</th>
-  </tr>
-  <tr *ngFor="let record of records">
-    <td>{{ record.userId }}</td>
-    <td>{{ record.role }}</td>
-  </tr>
-</table>
+  <div *ngIf="loading" class="loading">
+    Loading dashboard data...
+  </div>
+
+  <div *ngIf="!loading">
+    <h3>User Records</h3>
+    <table *ngIf="records.length > 0">
+      <thead>
+        <tr>
+          <th>User ID</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let record of records">
+          <td>{{ record.userId }}</td>
+          <td>{{ record.role }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="records.length === 0">No records found</p>
+  </div>
+</div>
