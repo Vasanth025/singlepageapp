@@ -1,51 +1,75 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
+import { UserService } from '../../services/user.service'; // Add UserService
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule], // Required for *ngIf, *ngFor, and routerLink
+  imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.components.html',
   styleUrls: ['./dashboard.component.css']
 })
+
 export class DashboardComponent implements OnInit {
   user: any;
   loading = true;
   records: any[] = [];
+  error: string | null = null;
 
-  constructor(private auth: AuthService) {}
+  constructor(
+    private auth: AuthService,
+    private userService: UserService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
-    // Get user data from AuthService
+    // Get user data 
     const userData = this.auth.getUser();
-    
-    // Parse if user data is a string (from localStorage)
     this.user = typeof userData === 'string' ? JSON.parse(userData) : userData;
 
-    // Load records immediately without delay
     this.loadRecords();
-    this.loading = false;
   }
 
   private loadRecords() {
     if (this.user?.role === 'Admin') {
-      this.records = [
-        { userId: 'bob', role: 'General User' },
-        { userId: 'alice', role: 'Admin' },
-      ];
+      this.userService.getAllUsers().subscribe({
+        next: (users: any) => {
+          this.records = users;
+          this.loading = false;
+        },
+        error: (err) => {
+          this.handleError(err);
+        }
+      });
     } else {
-      this.records = [{
-        userId: this.user?.userId || 'N/A',
-        role: this.user?.role || 'Unknown'
-      }];
+      
+      this.userService.getCurrentUser().subscribe({
+        next: (userDetails: any) => {
+          this.records = [userDetails]; 
+          this.loading = false;
+        },
+        error: (err) => {
+          this.handleError(err);
+        }
+      });
     }
+  }
+
+  private handleError(err: any) {
+    this.error = 'Failed in fetching user records';
+    this.loading = false;
+    console.error('Error fetching user data:', err);
+    
+    this.records = [{
+      userId: this.user?.userId || 'Unknown',
+      role: this.user?.role || 'Unknown'
+    }];
   }
 
   logout() {
     this.auth.logout();
-    // Note: You might want to navigate to the login page here
-    // Inject Router and add: this.router.navigate(['/login']);
+    this.router.navigate(['/login']);
   }
 }

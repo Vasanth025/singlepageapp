@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import {HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, catchError } from 'rxjs';
-import { throwError } from 'rxjs';  // for error handling
+import { Observable, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';  
 
 @Injectable({
   providedIn: 'root',
@@ -12,16 +12,36 @@ export class AuthService {
 
   constructor(private http:HttpClient, private router: Router) {}
 
-  // User registration
+  //user signup
   signup(data: { userId: string; password: string; role: string }): Observable<any> {
     return this.http.post(`${this.baseUrl}/signup`, data).pipe(
       catchError(this.handleError)  // Handle any error from the HTTP request
     );
   }
 
-  // User login
+//login user
 login(data: { userId: string; password: string }): Observable<any> {
-  return this.http.post(`${this.baseUrl}/login`, data);
+  return this.http.post(`${this.baseUrl}/login`, data).pipe(
+    tap((response: any) => {
+      
+      if (response.token && response.user) {
+        localStorage.setItem('token', response.token);
+        this.saveUser(response.user);
+      }
+    }),
+    catchError(this.handleError)
+  );
+}
+
+getToken(): string | null {
+  return localStorage.getItem('token');
+}
+
+//user logout
+logout(): void {
+  localStorage.removeItem('user');
+  localStorage.removeItem('token');
+  this.router.navigate(['/login']);
 }
 
 saveUser(user: any): void {
@@ -34,7 +54,7 @@ saveUser(user: any): void {
   }
 }
 
-// Retrieve user info
+//get user data
 getUser(): any | null {
   const userStr = localStorage.getItem('user');
   try {
@@ -45,26 +65,18 @@ getUser(): any | null {
   }
 }
 
-  // Logout user
-  logout(): void {
-    localStorage.removeItem('user');
-    this.router.navigate(['/login']);
-  }
 
-  // Check login status
   isLoggedIn(): boolean {
     return !!localStorage.getItem('user');
   }
 
-  // Optional: get user role
   getUserRole(): string | null {
     const user = this.getUser();
     return user?.role || null;
   }
 
-  // Error handling function
   private handleError(error: any): Observable<never> {
-    console.error('An error occurred:', error); // Log the error for debugging
+    console.error('An error occurred:', error); 
     return throwError(() => new Error('Something went wrong. Please try again later.'));
   }
 }

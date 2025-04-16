@@ -6,8 +6,8 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-signup',
-  standalone: true,  // Enable standalone mode
-  imports: [FormsModule, CommonModule],  // Import required modules
+  standalone: true,  
+  imports: [FormsModule, CommonModule], 
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.css']
 })
@@ -15,11 +15,10 @@ export class SignupComponent {
   user = {
     userId: '',
     password: '',
-    role: 'General User',  // Default role
+    role: 'General User',  
   };
 
-  // Available roles for selection
-  roles = ['General User', 'Admin', 'Editor']; // Add/modify as needed
+  roles = ['General User', 'Admin']; 
 
   constructor(private auth: AuthService, private router: Router) {}
 

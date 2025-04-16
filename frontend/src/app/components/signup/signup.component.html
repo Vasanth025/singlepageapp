@@ -1,5 +1,6 @@
-<h2>Sign Up</h2>
+
 <form (ngSubmit)="signup()">
+  <h2>Sign Up</h2>
   <input type="text" [(ngModel)]="user.userId" name="userId" placeholder="User ID" required />
   <input type="password" [(ngModel)]="user.password" name="password" placeholder="Password" required />
   <select [(ngModel)]="user.role" name="role">
